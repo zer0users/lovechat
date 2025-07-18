@@ -1,0 +1,68 @@
+local mon = peripheral.find("monitor")
+mon.setTextScale(1)
+mon.setBackgroundColor(colors.black)
+mon.setTextColor(colors.white)
+mon.clear()
+
+local w, h = mon.getSize()
+
+-- Cambiado: Azul y Verde
+local boxA = {x=5, y=5, color=colors.blue, heldBy=nil}
+local boxB = {x=20, y=5, color=colors.green, heldBy=nil}
+
+function drawBox(box)
+  mon.setBackgroundColor(box.color)
+  for y=box.y, box.y+2 do
+    for x=box.x, box.x+4 do
+      mon.setCursorPos(x, y)
+      mon.write(" ")
+    end
+  end
+end
+
+function isTouching(box, tx, ty)
+  return tx >= box.x and tx <= box.x+4 and ty >= box.y and ty <= box.y+2
+end
+
+function drawAll()
+  mon.setBackgroundColor(colors.black)
+  mon.clear()
+  drawBox(boxA)
+  drawBox(boxB)
+end
+
+drawAll()
+
+while true do
+  local event, side, x, y, player = os.pullEvent("monitor_touch")
+
+  -- Si tocó el azul y no lo tiene nadie o lo tiene el mismo jugador
+  if isTouching(boxA, x, y) then
+    if boxA.heldBy == nil then
+      boxA.heldBy = player
+      boxB.heldBy = nil
+    elseif boxA.heldBy == player then
+      boxA.heldBy = nil
+    end
+
+  -- Si tocó el verde y no lo tiene nadie o el mismo jugador
+  elseif isTouching(boxB, x, y) then
+    if boxB.heldBy == nil then
+      boxB.heldBy = player
+      boxA.heldBy = nil
+    elseif boxB.heldBy == player then
+      boxB.heldBy = nil
+    end
+
+  -- Si está agarrando y es el mismo jugador
+  elseif boxA.heldBy == player then
+    boxA.x = math.max(1, math.min(w - 4, x - 2))
+    boxA.y = math.max(1, math.min(h - 2, y - 1))
+
+  elseif boxB.heldBy == player then
+    boxB.x = math.max(1, math.min(w - 4, x - 2))
+    boxB.y = math.max(1, math.min(h - 2, y - 1))
+  end
+
+  drawAll()
+end
