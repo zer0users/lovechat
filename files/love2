@@ -1,0 +1,44 @@
+local monitor = peripheral.find("monitor")
+monitor.setTextScale(0.5)
+local w, h = monitor.getSize()
+local cubeX, cubeY = math.floor(w/2), math.floor(h/2)
+local appleX, appleY = math.random(1, w), math.random(1, h)
+local score = 0
+
+local function draw()
+  monitor.setBackgroundColor(colors.black)
+  monitor.clear()
+  
+  -- Draw apple
+  monitor.setCursorPos(appleX, appleY)
+  monitor.setBackgroundColor(colors.red)
+  monitor.write(" ")
+
+  -- Draw cube
+  monitor.setCursorPos(cubeX, cubeY)
+  monitor.setBackgroundColor(colors.blue)
+  monitor.write(" ")
+
+  -- Draw score
+  monitor.setCursorPos(1, 1)
+  monitor.setBackgroundColor(colors.black)
+  monitor.setTextColor(colors.white)
+  monitor.write("Score: " .. score)
+end
+
+draw()
+
+while true do
+  local e, side, x, y = os.pullEvent("monitor_touch")
+  cubeX, cubeY = x, y
+  
+  -- Check collision
+  if cubeX == appleX and cubeY == appleY then
+    score = score + 1
+    repeat
+      appleX, appleY = math.random(1, w), math.random(1, h)
+    until not (appleX == cubeX and appleY == cubeY)
+  end
+  
+  draw()
+end
