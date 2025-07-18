@@ -1,0 +1,51 @@
+-- Juego cooperativo: Agarra y mueve cuadros en un monitor (¡con amor de Dios!)
+local mon = peripheral.find("monitor")
+mon.setTextScale(1)
+mon.setBackgroundColor(colors.black)
+mon.setTextColor(colors.white)
+mon.clear()
+
+local boxA = {x=5, y=5, color=colors.red, held=false}
+local boxB = {x=20, y=5, color=colors.green, held=false}
+local w, h = mon.getSize()
+
+function drawBox(box)
+  mon.setBackgroundColor(box.color)
+  for y=box.y, box.y+2 do
+    for x=box.x, box.x+4 do
+      mon.setCursorPos(x, y)
+      mon.write(" ")
+    end
+  end
+end
+
+function isTouching(box, x, y)
+  return x >= box.x and x <= box.x+4 and y >= box.y and y <= box.y+2
+end
+
+function drawAll()
+  mon.clear()
+  drawBox(boxA)
+  drawBox(boxB)
+end
+
+drawAll()
+while true do
+  local e, side, x, y = os.pullEvent("monitor_touch")
+  if isTouching(boxA, x, y) then
+    boxA.held = not boxA.held
+  elseif isTouching(boxB, x, y) then
+    boxB.held = not boxB.held
+  end
+
+  -- Simula movimiento mientras esté sostenido
+  if boxA.held then
+    boxA.x = math.max(1, math.min(w-4, x-2))
+    boxA.y = math.max(1, math.min(h-2, y-1))
+  end
+  if boxB.held then
+    boxB.x = math.max(1, math.min(w-4, x-2))
+    boxB.y = math.max(1, math.min(h-2, y-1))
+  end
+  drawAll()
+end
