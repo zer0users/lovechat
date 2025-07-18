@@ -1,0 +1,50 @@
+local mon = peripheral.find("monitor")
+mon.setTextScale(0.5)
+mon.clear()
+
+local w, h = mon.getSize()
+local size = 1
+local x, y = math.floor(w/2), math.floor(h/2)
+local apple = {x = math.random(w), y = math.random(h)}
+local score = 0
+
+function draw()
+  mon.clear()
+  -- dibujar cubo azul (crece con el tamaño)
+  mon.setBackgroundColor(colors.blue)
+  for dx = 0, size-1 do
+    for dy = 0, size-1 do
+      local px, py = x + dx, y + dy
+      if px <= w and py <= h then
+        mon.setCursorPos(px, py)
+        mon.write(" ")
+      end
+    end
+  end
+  -- dibujar manzana
+  mon.setBackgroundColor(colors.red)
+  mon.setCursorPos(apple.x, apple.y)
+  mon.write(" ")
+  -- texto
+  mon.setCursorPos(1, 1)
+  mon.setBackgroundColor(colors.black)
+  mon.write("Score: "..score)
+end
+
+function checkCollision()
+  if apple.x >= x and apple.x < x + size and apple.y >= y and apple.y < y + size then
+    size = size + 1
+    score = score + 1
+    apple.x = math.random(w)
+    apple.y = math.random(h)
+  end
+end
+
+draw()
+while true do
+  local event, side, px, py = os.pullEvent("monitor_touch")
+  if px < x then x = x - 1 elseif px > x + size then x = x + 1 end
+  if py < y then y = y - 1 elseif py > y + size then y = y + 1 end
+  draw()
+  checkCollision()
+end
