@@ -1,0 +1,55 @@
+local mon = peripheral.find("monitor")
+mon.setTextScale(1)
+mon.setBackgroundColor(colors.black)
+mon.setTextColor(colors.white)
+mon.clear()
+
+local w, h = mon.getSize()
+
+-- Cambiado: Azul y Verde
+local boxA = {x=5, y=5, color=colors.blue, held=false}
+local boxB = {x=20, y=5, color=colors.green, held=false}
+
+function drawBox(box)
+  mon.setBackgroundColor(box.color)
+  for y=box.y, box.y+2 do
+    for x=box.x, box.x+4 do
+      mon.setCursorPos(x, y)
+      mon.write(" ")
+    end
+  end
+end
+
+function isTouching(box, tx, ty)
+  return tx >= box.x and tx <= box.x+4 and ty >= box.y and ty <= box.y+2
+end
+
+function drawAll()
+  mon.setBackgroundColor(colors.black)
+  mon.clear()
+  drawBox(boxA)
+  drawBox(boxB)
+end
+
+drawAll()
+
+while true do
+  local event, side, x, y = os.pullEvent("monitor_touch")
+
+  -- Tocar una caja para activarla o desactivarla
+  if isTouching(boxA, x, y) then
+    boxA.held = not boxA.held
+    boxB.held = false -- Solo uno a la vez
+  elseif isTouching(boxB, x, y) then
+    boxB.held = not boxB.held
+    boxA.held = false
+  elseif boxA.held then
+    boxA.x = math.max(1, math.min(w - 4, x - 2))
+    boxA.y = math.max(1, math.min(h - 2, y - 1))
+  elseif boxB.held then
+    boxB.x = math.max(1, math.min(w - 4, x - 2))
+    boxB.y = math.max(1, math.min(h - 2, y - 1))
+  end
+
+  drawAll()
+end
